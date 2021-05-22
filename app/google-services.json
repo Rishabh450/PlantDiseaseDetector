@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "781731112413",
+    "project_id": "plantsaverapp",
+    "storage_bucket": "plantsaverapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:781731112413:android:e5493194960996c3008234",
+        "android_client_info": {
+          "package_name": "ccaihackathon.com.plantsaver"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "781731112413-oefot4v96tevr2iggu5r0eqmi5o69kqa.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ccaihackathon.com.plantsaver",
+            "certificate_hash": "7c7d15f7e7840385ba635afd8f44d8cc8e92ede4"
+          }
+        },
+        {
+          "client_id": "781731112413-1utlvgq14dtguvbd5vf2nchv9pcpa24r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDA7pIuKNmEjhsiqR3B5FvH_0eEj18zevY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "781731112413-1utlvgq14dtguvbd5vf2nchv9pcpa24r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

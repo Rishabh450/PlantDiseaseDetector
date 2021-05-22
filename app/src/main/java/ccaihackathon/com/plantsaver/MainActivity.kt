@@ -9,16 +9,20 @@ import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
+import android.os.StrictMode
 import android.provider.MediaStore
 import android.provider.MediaStore.Images
-import android.support.annotation.RequiresApi
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.MenuItem
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuth.AuthStateListener
 import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -48,13 +52,54 @@ class MainActivity : AppCompatActivity() {
     private val mModelPath = "model.tflite"
     private val mLabelPath = "labels.txt"
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    var authStateListener: AuthStateListener? = null
+    var mAuth: FirebaseAuth? = null
+
+
+    override fun onStart() {
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+        Log.e("ak47", "on Start")
+        super.onStart()
+        Log.e("ak47", "on Start after super")
+        mAuth!!.addAuthStateListener(authStateListener!!)
+        Log.e("ak47", "on Start Ends")
+    }
+
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        Log.d("menuclicked", "yes")
+        if (item.itemId == R.id.signout) {
+            mAuth!!.signOut()
+
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    fun logout(v: MenuItem?) {
+       mAuth?.signOut()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         setContentView(R.layout.activity_main)
         mClassifier = Classifier(assets, mModelPath, mLabelPath, mInputSize)
+        mAuth = FirebaseAuth.getInstance()
 
+
+        authStateListener = AuthStateListener { firebaseAuth: FirebaseAuth ->
+            if (firebaseAuth.currentUser == null) {
+                Log.e("ak47", "user null")
+                val intent = Intent(this, SignInActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
+        }
         mCameraButton.setOnClickListener {
 
             code =1
@@ -79,8 +124,8 @@ class MainActivity : AppCompatActivity() {
 
         }
         mResultTextView.setOnClickListener{
-            val callDetailsIntent = Intent(this, DetailsActivity::class.java)
-            startActivity(callDetailsIntent)
+          /*  val callDetailsIntent = Intent(this, DetailsActivity::class.java)
+            startActivity(callDetailsIntent)*/
         }
 
         mGalleryButton.setOnClickListener {
@@ -124,13 +169,10 @@ class MainActivity : AppCompatActivity() {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Toast.makeText(this!!, "Permission Granted", Toast.LENGTH_SHORT).show()
 
-                    if(code ==1)
-                    {
+                    if (code == 1) {
                         val callCameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
                         startActivityForResult(callCameraIntent, mCameraRequestCode)
-                    }
-                    else
-                    {
+                    } else {
                         val intent = Intent()
                         intent.type = "image/*"
                         intent.action = Intent.ACTION_GET_CONTENT
@@ -149,6 +191,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
         if(requestCode == mCameraRequestCode){
             if(resultCode == Activity.RESULT_OK && data != null) {
                 mBitmap = data.extras!!.get("data") as Bitmap
